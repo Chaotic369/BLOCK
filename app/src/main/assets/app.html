@@ -465,7 +465,8 @@ function paint(){const top=stack[stack.length-1],el=$$(".scr",stackEl).pop();if(
  $$("[data-h]",el).forEach(b=>requestAnimationFrame(()=>b.style.height=b.dataset.h));
  if(top.name==="stats")dayDet(top.st);
   if(top.name==="perms"&&firstRun)checkFirstRun()}
-function appRow(l,ms,mx){const c=colorFor(l);return `<div class="arow"><span class="adot" style="background:${c}">${esc((l||"?").trim().charAt(0).toUpperCase())}</span><div class="ainf"><div class="rl"><span class="anm">${esc(l)}</span><span class="atm">${fmtDur(ms)}</span></div><i class="meter"><u style="width:${Math.max(3,ms/mx*100)}%;background:${c}"></u></i></div></div>`}
+function appRow(l,ms,mx){let a=null;try{a=(Native.listApps()||[]).find(x=>x.label===l)}catch(e){}
+ a=a||{label:l,pkg:"",color:"var(--chip)"};return `<div class="arow">${icoHtml(a)}<div class="ainf"><div class="rl"><span class="anm">${esc(l)}</span><span class="atm">${fmtDur(ms)}</span></div><i class="meter"><u style="width:${Math.max(3,ms/mx*100)}%"></u></i></div></div>`}
 function dayDet(st,tap){const sc=$$(".scr",stackEl).pop(),ch=sc&&$(".chart",sc);if(!ch)return;const w=ch.parentNode,lb=$(".lbls",w);$$(".dayd",w.parentNode).forEach(e=>e.remove());[...ch.children,...(lb?lb.children:[])].forEach(e=>e.classList.remove("sel"));
  const i=st.day;if(i==null)return;const u=Native.usage(),d=u.daily[i],det=u.det&&u.det[i];
  if(!d||!(d[1]>0)||!det||!det.length){st.day=null;if(tap)toast("No details for this day");return}
