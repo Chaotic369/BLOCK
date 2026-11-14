@@ -1,0 +1,184 @@
+name: Custom Build
+
+# Repo: Chaotic369/Lockapp
+# Note: this project uses AGP 8.7.3 (gradle/libs.versions.toml), which requires Gradle 8.9 or newer.
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: "App display name"
+        required: true
+        default: "ChaoticLauncher"
+        type: string
+      app_version:
+        description: "App version name (for example 1.0.0)"
+        required: true
+        default: "1.0.0"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Patch app name and version
+        env:
+          APP_NAME: ${{ github.event.inputs.app_name || 'ChaoticLauncher' }}
+          APP_VERSION: ${{ github.event.inputs.app_version || '1.0.0' }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+          from xml.sax.saxutils import escape, quoteattr
+
+          name = os.environ.get("APP_NAME", "").strip() or "ChaoticLauncher"
+          version = os.environ.get("APP_VERSION", "").strip() or "1.0.0"
+          run_number = int(os.environ.get("RUN_NUMBER", "1") or "1")
+
+          # versionCode from the first three numbers of the version (1.2.3 -> 10203),
+          # falling back to the run number if the version has no digits.
+          parts = [int(x) for x in re.findall(r"\d+", version)[:3]]
+          while len(parts) < 3:
+              parts.append(0)
+          version_code = parts[0] * 10000 + parts[1] * 100 + parts[2]
+          if version_code <= 0:
+              version_code = run_number
+
+          # 1) android:label on the <application> element
+          manifest_path = "app/src/main/AndroidManifest.xml"
+          with open(manifest_path, encoding="utf-8") as f:
+              manifest = f.read()
+          tag = re.search(r"<application\b[^>]*>", manifest, re.S)
+          if not tag:
+              sys.exit("No <application> element found in " + manifest_path)
+          old_tag = tag.group(0)
+          if re.search(r'android:label="[^"]*"', old_tag):
+              new_tag = re.sub(
+                  r'android:label="[^"]*"',
+                  lambda m: "android:label=" + quoteattr(name),
+                  old_tag,
+                  count=1,
+              )
+          else:
+              new_tag = old_tag.replace(
+                  "<application", "<application android:label=" + quoteattr(name), 1
+              )
+          manifest = manifest[: tag.start()] + new_tag + manifest[tag.end():]
+          with open(manifest_path, "w", encoding="utf-8") as f:
+              f.write(manifest)
+
+          # Keep the app_name string in sync: the in-app Settings guard looks the name up from it.
+          strings_path = "app/src/main/res/values/strings.xml"
+          if os.path.exists(strings_path):
+              with open(strings_path, encoding="utf-8") as f:
+                  strings = f.read()
+              name_res = escape(name).replace("'", "\\'")
+              strings = re.sub(
+                  r'(<string name="app_name">)[^<]*(</string>)',
+                  lambda m: m.group(1) + name_res + m.group(2),
+                  strings,
+              )
+              with open(strings_path, "w", encoding="utf-8") as f:
+                  f.write(strings)
+
+          # 2) versionName / versionCode in app/build.gradle.kts
+          gradle_path = "app/build.gradle.kts"
+          with open(gradle_path, encoding="utf-8") as f:
+              gradle = f.read()
+          gradle, n_code = re.subn(
+              r"versionCode\s*=\s*\d+",
+              lambda m: "versionCode = %d" % version_code,
+              gradle,
+              count=1,
+          )
+          gradle, n_name = re.subn(
+              r'versionName\s*=\s*"[^"]*"',
+              lambda m: 'versionName = "%s"' % version.replace("\\", "\\\\").replace('"', '\\"'),
+              gradle,
+              count=1,
+          )
+          if n_code != 1 or n_name != 1:
+              sys.exit("Could not find versionCode/versionName in " + gradle_path)
+          with open(gradle_path, "w", encoding="utf-8") as f:
+              f.write(gradle)
+
+          print("Name:", name)
+          print("versionName:", version)
+          print("versionCode:", version_code)
+          PY
+
+      - name: Inject launcher icon
+        if: ${{ hashFiles('build-icon.png') != '' }}
+        run: |
+          python3 -m pip install pillow || python3 -m pip install --break-system-packages pillow
+          python3 - <<'PY'
+          import os
+          from PIL import Image
+
+          src = Image.open("build-icon.png").convert("RGBA")
+
+          # Center-crop to a square so non-square images are not stretched.
+          side = min(src.size)
+          left = (src.width - side) // 2
+          top = (src.height - side) // 2
+          src = src.crop((left, top, left + side, top + side))
+
+          sizes = {"mdpi": 48, "hdpi": 72, "xhdpi": 96, "xxhdpi": 144, "xxxhdpi": 192}
+          for density, px in sizes.items():
+              out_dir = "app/src/main/res/mipmap-" + density
+              os.makedirs(out_dir, exist_ok=True)
+              icon = src.resize((px, px), Image.LANCZOS)
+              for filename in ("ic_launcher.png", "ic_launcher_round.png"):
+                  icon.save(os.path.join(out_dir, filename))
+
+          # minSdk is 26, so the adaptive icon XMLs would override these PNGs on every device.
+          for filename in ("ic_launcher.xml", "ic_launcher_round.xml"):
+              path = os.path.join("app/src/main/res/mipmap-anydpi-v26", filename)
+              if os.path.exists(path):
+                  os.remove(path)
+
+          print("Icon injected into mipmap-* densities")
+          PY
+
+      - name: Restore signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then
+            echo "::error::Secret DEBUG_KEYSTORE_B64 is not set"
+            exit 1
+          fi
+          mkdir -p ~/.android
+          echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
+          keytool -list -v -keystore ~/.android/debug.keystore \
+            -alias androiddebugkey -storepass android | grep -E "SHA1|SHA256"
+
+      - name: Build debug APK
+        run: gradle assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.inputs.app_name || 'ChaoticLauncher' }}
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
