@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#B3202B</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <!-- Page colours of assets/app.html (bg and surface variables), used behind the WebView. -->
+    <color name="page_bg_light">#F6F3F4</color>
+    <color name="page_bg_dark">#050505</color>
+    <color name="page_surface_light">#FFFFFF</color>
+    <color name="page_surface_dark">#0D0D0D</color>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App Blocker</string>
+    <string name="channel_blocker_name">Blocker status</string>
+    <string name="channel_blocker_description">Shown while an app or website lock is active</string>
+    <string name="channel_alerts_name">Lock alerts</string>
+    <string name="channel_alerts_description">Warns you if something weakens an active lock</string>
+    <string name="notification_title">App Blocker is active</string>
+    <string name="notification_text">One or more locks are running</string>
+    <string name="accessibility_description">Detects when a blocked app or website is opened and shows the block screen. No screen content is stored or sent anywhere.</string>
+</resources>

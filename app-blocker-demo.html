@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;400;600;700&display=swap" rel="stylesheet">
+<title>App Blocker – UI demo</title>
+<style>
+:root{--bg:#050505;--surface:#0d0d0d;--card:rgba(255,255,255,.06);--on:#ececec;--on2:rgba(200,200,200,.62);--primary:#b3202b;--on-primary:#fff;--acc2:#ffb020;--red:#ec3b46;--tonal:rgba(255,255,255,.09);--tertiary:#ff6f78;--line:rgba(255,255,255,.08);--chip:rgba(255,255,255,.07);--shell:#08060c;--shadow:rgba(0,0,0,.25)}
+:root[data-theme="light"]{--bg:#f6f3f4;--surface:#fff;--card:#fff;--on:#1a1416;--on2:#6b6165;--primary:#b3202b;--on-primary:#fff;--acc2:#fcae00;--red:#c4161f;--tonal:rgba(0,0,0,.06);--tertiary:#b3202b;--line:rgba(0,0,0,.09);--chip:rgba(0,0,0,.05);--shell:#e8e4e6;--shadow:rgba(0,0,0,.06)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font:400 14px/20px 'Bricolage Grotesque',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--shell);color:var(--on);display:flex;align-items:center;justify-content:center;gap:28px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{filter:brightness(1.3)}input:focus-visible{outline:none}
+#phone{position:relative;width:392px;height:min(820px,96vh);background:var(--bg);border-radius:44px;overflow:hidden;box-shadow:0 0 0 10px #1a1628;display:flex;flex-direction:column;isolation:isolate}
+#status{height:32px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 22px;font-size:12px;font-weight:500}
+#nav{height:22px;flex:none;display:flex;justify-content:center;align-items:center}#nav i{width:110px;height:4px;border-radius:2px;background:var(--on2);opacity:.5}
+#stack{position:relative;flex:1;overflow:hidden}
+.scr{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;animation:in .22s ease-out}
+@keyframes in{from{transform:translateX(40px);opacity:0}}
+.scr.pop{animation:out .18s ease-in forwards}@keyframes out{to{transform:translateX(40px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.scr,.scr.pop{animation:none}}
+.bar{height:64px;flex:none;display:flex;align-items:center;gap:4px;padding:0 4px 0 4px}
+.bar h1{font-size:22px;line-height:28px;font-weight:500;padding-left:12px}.bar .ib+h1{padding-left:4px}
+.ib{width:48px;height:48px;border-radius:50%;display:grid;place-items:center}.ib:active{background:var(--chip)}
+.body{flex:1;overflow:auto;padding:0 16px 24px;display:flex;flex-direction:column;gap:12px}
+svg.i{width:24px;height:24px;fill:currentColor;color:var(--red);flex:none}
+.card{background:var(--card);border-radius:12px;padding:16px;display:flex;align-items:center;gap:16px;width:100%;text-align:left}
+button.card:active{filter:brightness(.96)}
+.card .grow{flex:1;min-width:0}
+.t-md{font-size:16px;line-height:24px;font-weight:500}.t-lg{font-size:22px;line-height:28px;font-weight:600}.t-hd{font-size:28px;line-height:34px;font-weight:700}
+.sub{color:var(--on2)}.small{font-size:12px;line-height:16px;color:var(--on2)}
+.pri{color:var(--primary);font-weight:500}.err{color:var(--tertiary)}
+.btn{background:var(--primary);color:var(--on-primary);height:40px;padding:0 24px;border-radius:20px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.btn:disabled{opacity:.38;cursor:default}.btn.full{width:100%}
+.tonal{background:var(--tonal);color:var(--on);height:40px;padding:0 20px;border-radius:20px;font-weight:500}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;height:32px;padding:0 14px;border-radius:8px;border:1px solid var(--line);font-weight:500}
+.chip[aria-pressed=true]{background:var(--tonal);border-color:transparent}
+.dur{display:flex;flex-direction:column;gap:12px;width:100%}.dur .row{display:flex;justify-content:space-between;align-items:center}
+input[type=text]{width:100%;height:56px;border-radius:4px;border:0;background:transparent;color:var(--on);padding:0 16px;font:inherit;font-size:16px}
+input[type=text]:focus{outline:none}
+.li{display:flex;align-items:center;gap:16px;padding:10px 16px;width:100%;text-align:left}.li:disabled{opacity:.5;cursor:default}.li:not(:disabled):active{background:var(--chip)}
+.ico{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;flex:none}
+.stat{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}.stat .card{display:block}
+.chart{display:flex;align-items:flex-end;gap:0;height:140px;margin-top:8px}.chart div{flex:1;display:flex;align-items:flex-end;justify-content:center;height:100%}.chart b{width:60%;background:var(--primary);border-radius:4px 4px 0 0;min-height:2px;transition:height .5s}
+.lbls{display:flex}.lbls span{flex:1;text-align:center}
+.rowb{display:flex;justify-content:space-between;width:100%;font-size:16px;line-height:24px}
+.code{font:12px/16px ui-monospace,Menlo,monospace;background:var(--surface);padding:10px;border-radius:8px;word-break:break-all;margin-top:8px;user-select:all}
+#toast{position:absolute;left:16px;right:16px;bottom:16px;background:#2e3040;color:#fff;padding:14px 16px;border-radius:6px;opacity:0;transform:translateY(12px);transition:.2s;pointer-events:none;z-index:30}#toast.on{opacity:1;transform:none}
+.scrim{position:absolute;inset:0;background:#0007;display:grid;place-items:center;padding:28px;z-index:20}
+.dlg{background:var(--surface);border-radius:28px;padding:24px;width:100%;display:flex;flex-direction:column;gap:16px}
+.dlg .acts{display:flex;justify-content:flex-end;gap:8px}.dlg .acts button{padding:10px 12px;border-radius:20px;color:var(--primary);font-weight:500}
+.ovl{position:absolute;inset:0;z-index:25;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:8px}
+.ovl .big{width:88px;height:88px;border-radius:50%;background:color-mix(in srgb,var(--tertiary) 18%,transparent);color:var(--tertiary);display:grid;place-items:center;margin-bottom:12px}.ovl .big svg{width:48px;height:48px}
+#demo{width:230px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+#demo h2{font-size:15px;font-weight:600}#demo button{background:var(--surface);border-radius:10px;padding:10px 12px;text-align:left}
+#demo p{color:var(--on2);font-size:12px;line-height:16px}
+#demoToggle{display:none}
+@media (max-width:640px){body{display:block}#phone{width:100%;height:100%;border-radius:0;box-shadow:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}#status,#nav{display:none}
+#demo{display:none;position:fixed;top:8px;right:8px;z-index:50;background:var(--surface);padding:14px;border-radius:14px;box-shadow:0 8px 30px #0005}#demo.open{display:flex}
+#demoToggle{display:grid;position:fixed;right:8px;bottom:8px;z-index:51;width:40px;height:40px;border-radius:50%;background:var(--primary);color:var(--on-primary);place-items:center;font-size:12px;font-weight:700}}
+@media (min-width:641px) and (max-width:860px){#demo{display:none}}
+/* ===== native redesign (matches Quick Launcher look) ===== */
+#nav i{width:120px;height:4.5px;border-radius:4px;background:var(--on);opacity:.75}
+
+.bar{height:72px;padding:0 16px 0 12px;gap:12px}
+.bar h1{font-size:22px;line-height:28px;font-weight:700;letter-spacing:-.3px;padding-left:0}
+.ib{width:40px;height:40px;border-radius:14px}
+.tile{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;flex:none;color:var(--red)}
+.tile.big{width:56px;height:56px;border-radius:18px}.tile.big svg.i{width:28px;height:28px}
+.tile.ok{color:var(--acc2)}
+.hdic{display:grid;place-items:center;flex:none;color:var(--acc2);margin-left:8px}
+.hdic svg.i{width:30px;height:30px;color:inherit}
+.hdic.on{color:var(--acc2)}
+.sw{width:52px;height:30px;border-radius:15px;background:var(--chip);position:relative;flex:none;transition:background .2s}
+.sw i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--on2);transition:transform .2s,background .2s}
+.sw.on{background:var(--acc2)}
+.sw.on i{transform:translateX(22px);background:#2a1800}
+.ovl.ls{position:absolute;inset:0;z-index:60;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:12px;padding:36px 16px 20px;text-align:left}
+.lsimg{position:relative;flex:1;min-height:0;border-radius:28px;background-color:var(--chip);background-size:cover;background-position:center;overflow:hidden;display:flex;align-items:flex-end}
+.lsimg:after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.65),transparent 55%)}
+.lsinfo{position:relative;z-index:1;padding:20px;color:#fff;display:flex;flex-direction:column;gap:4px}
+.lsname{font-size:18px;line-height:24px;font-weight:700}
+.lstime{font-size:22px;line-height:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.lsimg.pv{flex:none;width:54%;align-self:center;border-radius:24px}
+.pv .lsinfo{padding:14px}
+.pv .lsname{font-size:12px;line-height:16px}
+.pv .lstime{font-size:14px;line-height:18px}
+.lsimg.none:after{display:none}
+.lsimg.none .lsinfo{color:var(--on)}
+.lsnone{position:absolute;inset:0;display:grid;place-items:center;color:var(--on2);font-size:13px}
+.ovl.ls{align-items:center;justify-content:center;gap:20px;padding:24px 16px}
+.ovl.ls .btn{width:72%}
+.lscard{width:72%;display:flex;flex-direction:column;gap:14px}
+.lscard .lsimg{flex:none;width:100%;aspect-ratio:3/4;min-height:0;border-radius:28px}
+.lscard .lsimg:after{display:none}
+.lsrow{display:flex;align-items:center;gap:12px;text-align:left}
+.lscard .lsname{font-size:18px;line-height:24px;font-weight:700;color:var(--on)}
+.lscard .lstime{font-size:15px;line-height:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--acc2)}
+.lscard.pv{width:58%;align-self:center;gap:10px}
+.lscard.pv .lsimg{border-radius:22px}
+.lscard.pv .lsrow{gap:8px}
+.lscard.pv .ico,.lscard.pv .tile{width:32px;height:32px;border-radius:10px;font-size:14px}
+.lscard.pv .lsname{font-size:14px;line-height:18px}
+.lscard.pv .lstime{font-size:12px;line-height:16px}
+.lscrop{position:absolute;inset:0;z-index:70;background:var(--bg,var(--card));display:flex;flex-direction:column;align-items:center;gap:14px;padding:36px 20px 20px}
+.cropf{position:relative;width:70%;aspect-ratio:3/4;border-radius:28px;overflow:hidden;background:var(--chip);touch-action:none;cursor:grab;flex:none}
+.cropf img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+#cropz{width:70%;accent-color:var(--acc2)}
+.cropb{display:flex;gap:12px;width:100%;margin-top:auto}
+.cropb button{flex:1}
+.tile.brand{width:36px;height:36px;border-radius:12px;background:var(--acc2)}.tile.brand svg.i{color:#2a1800}
+.card{background:var(--card);border-radius:20px}
+.card.navc{padding:14px 16px}.chev{color:var(--on2);display:grid}
+.hero{display:flex;gap:16px;align-items:center;padding:18px;border-radius:24px;background:var(--card)}
+.hero.on{background:rgba(255,176,32,.14)}
+
+.t-lg{font-size:18px;line-height:24px;font-weight:700}
+.stat .t-lg{font-size:26px;line-height:30px}
+.timer{font-variant-numeric:tabular-nums;font-weight:700;color:var(--acc2)}
+.empty{padding:18px;border-radius:20px;background:var(--card);color:var(--on2);text-align:center}
+.pri,.err{color:var(--acc2)}
+.btn{flex:none;background:var(--primary);height:48px;border-radius:16px;font-weight:700}
+.btn.sm{height:36px;padding:0 18px;border-radius:12px;box-shadow:none}
+.tonal{background:var(--tonal);height:48px;border-radius:16px;font-weight:600}.tonal.full{width:100%}
+.chip{height:36px;border-radius:12px;background:var(--chip);border:0;color:var(--on2)}
+.chip[aria-pressed=true]{background:var(--acc2);color:#2a1800}
+.dur{background:var(--card);border-radius:20px;padding:16px}
+.stepper{align-items:center;gap:12px}
+.dv{flex:1;text-align:center;display:flex;flex-direction:column}
+.dv .big{font-size:40px;line-height:44px;font-weight:700;letter-spacing:-1px}
+.rnd{width:52px;height:52px;border-radius:18px;background:var(--chip);display:grid;place-items:center;flex:none}
+.rnd:active{background:var(--primary);color:#fff}.rnd:active svg.i{color:#fff}
+.search{display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-radius:16px;background:var(--chip);color:var(--on2);width:100%}
+.search:focus-within{background:var(--tonal);color:var(--on)}
+.search input[type=text]{height:100%;border:0;background:none;padding:0;font-size:15px;border-radius:0;color:var(--on)}
+.search input[type=text]:focus{border:0;padding:0}
+.st-hero{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:20px;border-radius:24px;background:var(--card)}
+.st-big{font-size:44px;line-height:48px;font-weight:700;letter-spacing:-1px;color:var(--acc2)}
+.st-ins{font-size:15px;line-height:22px;margin-top:6px}
+.st-sec{flex-direction:column;align-items:stretch;gap:12px}
+.stat .card{padding:14px 16px}
+.search input[type=text]{flex:1;min-width:0;width:auto;text-overflow:ellipsis}
+.search input::placeholder{color:var(--on2);opacity:.7}
+.search:focus-within{box-shadow:inset 0 0 0 2px var(--acc2)}
+.search svg.i{color:var(--on2)}
+.search:focus-within svg.i{color:var(--acc2)}
+.ico{border-radius:14px}
+.ico.lg{width:56px;height:56px;border-radius:18px;font-size:24px}
+.li{padding:10px 20px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;flex:none}
+.pill svg.i{width:16px;height:16px}
+.pill.ok{color:var(--acc2)}
+.pill.lock{background:rgba(255,176,32,.14);color:var(--acc2)}
+.opt{font-size:11px;font-weight:600;color:var(--on2);background:var(--chip);padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.perm{align-items:flex-start}.perm .btn,.perm .pill{align-self:center}
+.tgt{display:flex;align-items:center;gap:16px}
+.note{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--chip);color:var(--on2)}
+.note svg.i{margin-top:1px}
+.note.warn{background:rgba(255,176,32,.14);color:var(--acc2)}
+.sum{text-align:center;color:var(--on2)}.sum b{color:var(--on);font-size:18px}
+.chart{height:150px}
+.chart b{background:var(--chip);border-radius:8px}.chart b.today{background:var(--acc2)}
+.chart>div,.lbls>span{cursor:pointer}
+.chart>div.sel b{outline:2px solid var(--on);outline-offset:1px}
+.lbls>span.sel{color:var(--acc2);font-weight:700}
+.dayd{display:flex;flex-direction:column;gap:10px;padding-top:12px;border-top:1px solid var(--line)}
+.rowm{width:100%}
+.rowm .rl{display:flex;justify-content:space-between;font-size:15px;line-height:22px;margin-bottom:6px}
+.meter{display:block;height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
+.meter u{display:block;height:100%;background:var(--acc2);border-radius:3px;text-decoration:none}
+#toast{background:var(--surface);color:var(--on);border-radius:16px}
+.scrim{place-items:end stretch;padding:0;background:rgba(0,0,0,.6);animation:fade .18s}
+.dlg{border-radius:28px 28px 0 0;padding:14px 22px 26px;background:var(--surface);gap:12px;align-items:flex-start;animation:up .24s cubic-bezier(.16,1,.3,1)}
+
+.dlg .acts{flex-direction:column;width:100%;gap:8px;margin-top:8px}
+.dlg .acts button{padding:0 20px;border-radius:16px}
+.dlg .acts .btn{color:var(--on-primary)}.dlg .acts .tonal{color:var(--on)}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+@keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.scrim,.dlg{animation:none}}
+
+.ovl .big{width:104px;height:104px;background:var(--chip);color:var(--red);margin-bottom:28px}
+.foot{flex:none;padding:12px 16px 16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.dur [hidden]{display:none!important}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:16px;background:var(--chip)}
+.seg button{height:36px;border-radius:12px;font-weight:600;color:var(--on2)}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--on)}
+.cust,.timebox{display:flex;gap:8px;align-items:center}
+.cust .search,.timebox .search{flex:1;height:48px}
+.cust .btn{height:48px}
+.timebox .seg{width:120px;flex:none}
+.sugs{display:flex;flex-direction:column;gap:4px;width:100%}
+.sg{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:14px;background:var(--card);text-align:left;width:100%}
+.sg .tile{width:32px;height:32px;border-radius:10px}.sg svg.i{width:18px;height:18px}
+.sg b{color:var(--acc2);font-weight:700}
+.bar:not(:has(.ib)) h1{letter-spacing:.2em;font-weight:800}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="status"><span id="clock">9:41</span><span>5G ▮▮▮ 86%</span></div>
+  <div id="stack"></div>
+  <div id="nav"><i></i></div>
+  <div id="toast"></div>
+</div>
+<aside id="demo">
+  <h2>Demo controls</h2>
+  <p>Only for this preview; they won’t exist in the real app.</p>
+  <button data-d="overlay-app">Open a locked app (block screen)</button>
+  <button data-d="overlay-web">Open a locked website</button>
+  <button data-d="ff">Fast-forward 10 min</button>
+  <button data-d="theme">Toggle dark mode</button>
+  <button data-d="dns">Toggle strict Private DNS</button>
+  <button data-d="first">Restart as first run</button>
+  <button data-d="reset">Reset all data</button>
+</aside>
+<button id="demoToggle" aria-label="Demo controls">demo</button>
+
+<script>
+/* ============ NATIVE BRIDGE ============
+   Everything the UI needs from the device goes through `Native`.
+   In the real WebView app, replace each method body with the matching
+   Android JS interface call (e.g. JSON.parse(Android.listApps())) and
+   call render() from the native side when data changes (window.onNativeEvent). */
+const MIN=60000, APPS=[
+["Instagram","com.instagram.android","#d6249f"],["YouTube","com.google.android.youtube","#e62117"],["Chrome","com.android.chrome","#4285f4"],
+["WhatsApp","com.whatsapp","#1fa855"],["TikTok","com.zhiliaoapp.musically","#161823"],["X","com.twitter.android","#14171a"],
+["Reddit","com.reddit.frontpage","#ff4500"],["Netflix","com.netflix.mediaclient","#b20710"],["Spotify","com.spotify.music","#1db954"],
+["Snapchat","com.snapchat.android","#e6c800"],["Facebook","com.facebook.katana","#1877f2"],["Gmail","com.google.android.gm","#d93025"],
+["Telegram","org.telegram.messenger","#2a9fd8"],["Discord","com.discord","#5865f2"],["Twitch","tv.twitch.android.app","#9146ff"],
+["Pinterest","com.pinterest","#e60023"],["Maps","com.google.android.apps.maps","#188038"],["Play Store","com.android.vending","#0f9d58"]];
+const PERMS=[
+{id:"usage",t:"Usage access",d:"Lets the app read screen time and detect which app is open.",req:1,sys:"Usage access"},
+{id:"a11y",t:"Accessibility service",d:"Detects blocked apps and websites as they open and shows the block screen.",req:1,sys:"Accessibility"},
+{id:"overlay",t:"Display over other apps",d:"Required to show the block screen on top of a blocked app.",req:1,sys:"Display over other apps"},
+{id:"admin",t:"Device administrator",d:"Prevents uninstalling the app while a lock is active.",req:1,sys:"Device admin apps"},
+{id:"vpn",t:"Website blocking (VPN)",d:"Filters blocked domains in every browser through a local DNS filter. Nothing leaves your device.",req:0,sys:"VPN"},
+{id:"notif",t:"Notifications",d:"Warns you if accessibility or device administrator is switched off during a lock.",req:0,sys:"Notifications"}];
+const fresh=()=>({off:0,apps:{},domains:[],perms:{usage:1,a11y:1,overlay:1,admin:1,vpn:0,notif:1},owner:0,strictDns:0,dark:null});
+let S=fresh();
+try{const x=localStorage.getItem("ab-demo");if(x)S=Object.assign(fresh(),JSON.parse(x))}catch(e){}
+const save=()=>{try{localStorage.setItem("ab-demo",JSON.stringify(S))}catch(e){}};
+const now=()=>Date.now()+S.off*MIN;
+const Native={
+ listApps:()=>APPS.map(([label,pkg,color])=>({label,pkg,color})).sort((a,b)=>a.label.toLowerCase().localeCompare(b.label.toLowerCase())),
+ appInfo:p=>Native.listApps().find(a=>a.pkg===p)||{label:p,pkg:p,color:"#666"},
+ lockedApps:()=>Object.entries(S.apps).filter(([,u])=>u>now()).map(([pkg,until])=>({...Native.appInfo(pkg),until})).sort((a,b)=>b.until-a.until),
+ startBlock(pkg,ms){S.apps[pkg]=now()+ms;save()},
+ domains:()=>[...S.domains].sort((a,b)=>b.until-a.until),
+ addDomain(d,ms){d=d.trim().toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").split("/")[0];S.domains=S.domains.filter(x=>x.domain!==d);S.domains.unshift({domain:d,until:now()+ms});save()},
+ removeDomain(d){S.domains=S.domains.filter(x=>x.domain!==d);save()},
+ perms:()=>PERMS.map(p=>({...p,granted:!!S.perms[p.id]})),
+ setPerm(id,v){S.perms[id]=v?1:0;save()},
+ usage:()=>({hasPermission:!!S.perms.usage,daily:[["Sat",4.4],["Sun",5.1],["Mon",3.2],["Tue",3.9],["Wed",4.7],["Thu",3.6],["Fri",3.1]].map(([l,h])=>[l,h*3600000]),
+  weeks:[29.5,31.2,26.8,28.4].map(h=>h*3600000),
+    top:[["Instagram",11.2],["YouTube",8.4],["WhatsApp",5.1],["Chrome",3.6],["Reddit",2.3]].map(([label,h])=>({label,ms:h*3600000})),
+      det:Object.fromEntries(Object.entries({0:[["Instagram",1.6],["YouTube",1.3],["WhatsApp",.8],["Chrome",.7]],1:[["YouTube",1.9],["Instagram",1.5],["Netflix",.9],["WhatsApp",.8]],3:[["Instagram",1.4],["YouTube",1.1],["Reddit",.8],["WhatsApp",.6]],4:[["Instagram",1.7],["YouTube",1.4],["Chrome",.9],["WhatsApp",.7]],5:[["Instagram",1.2],["WhatsApp",.9],["YouTube",.9],["Reddit",.6]],6:[["Instagram",1.1],["YouTube",.9],["WhatsApp",.6],["Chrome",.5]]}).map(([k,a])=>[k,a.map(([label,h])=>({label,ms:h*3600000}))]))}),
+ anyLockActive:()=>Native.lockedApps().length>0||S.domains.some(d=>d.until>now())
+};
+
+/* ============ helpers (ported from TimeUtils / UsageInsightGenerator) ============ */
+function fmtDur(ms){let s=Math.max(0,Math.floor(ms/1000)),d=Math.floor(s/86400),h=Math.floor(s%86400/3600),m=Math.floor(s%3600/60);
+ return d>0?(h?`${d}d ${h}h`:`${d}d`):h>0?(m?`${h}h ${m}m`:`${h}h`):m>0?`${m}m`:`${s}s`}
+function fmtLeft(until){let l=until-now();if(l<=0)return"00:00";let s=Math.floor(l/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60,p=n=>String(n).padStart(2,"0");return h>0?`${h}:${p(m)}:${p(x)}`:`${p(m)}:${p(x)}`}
+function insight(u,avg,today){const t=u.top[0];if(!t)return"No usage recorded yet. Use your phone for a while and check back.";
+ let s=`Your most used app is ${t.label} with ${fmtDur(t.ms)} this week. Your daily average is ${fmtDur(avg)}. `,d=today-avg;
+ return s+(d>avg/5?`Today you are ${fmtDur(d)} above your average.`:d<-avg/5?`Today you are ${fmtDur(-d)} below your average.`:"Today is close to your average.")}
+const IC={back:"M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",block:"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z",
+ lang:"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2s.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.08 16zm2.95-8H5.08a7.99 7.99 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2s.07-1.35.16-2h4.68c.09.65.16 1.32.16 2s-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2s-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z",
+ bars:"M5 9.2h3V19H5V9.2zM10.6 5h2.8v14h-2.8V5zm5.6 8H19v6h-2.8v-6z",sec:"M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z",del:"M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z",
+  chev:"M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z",check:"M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z",
+  lock:"M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z",
+  layers:"M11.99 18.54l-7.37-5.73L3 14.07l9 7 9-7-1.63-1.27-7.38 5.74zM12 16l7.36-5.73L21 9l-9-7-9 7 1.63 1.27L12 16z",
+  eye:"M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z",
+  access:"M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z",
+  bell:"M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z",
+  search:"M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
+  minus:"M19 13H5v-2h14v2z",plus:"M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
+   clock:"M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"};
+ const PI={usage:"eye",a11y:"access",overlay:"layers",admin:"sec",vpn:"lock",notif:"bell"};
+const ic=k=>`<svg class="i" viewBox="0 0 24 24"><path d="${IC[k]}"/></svg>`;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* ============ navigation (mirrors NavGraph) ============ */
+const stackEl=$("#stack"); let stack=[], firstRun=false, ticker=[];
+const PRESETS=[15,30,60,120,240,480,1440];
+function go(name,arg){stack.push({name,arg,st:{minutes:60,query:"",input:""}});mount(true)}
+function back(){if(stack.length<=1)return;const old=$$(".scr",stackEl).pop();old.classList.add("pop");stack.pop();setTimeout(()=>{old.remove();paint()},170)}
+function mount(anim){$$(".scr",stackEl).forEach(e=>e.remove());const el=document.createElement("section");el.className="scr";if(!anim)el.style.animation="none";stackEl.append(el);paint()}
+function bar(title,withBack,icon){return `<div class="bar">${withBack?`<button class="ib" data-a="back" aria-label="Back">${ic("back")}</button>`:""}${icon||""}<h1>${title}</h1></div>`}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toast.x);toast.x=setTimeout(()=>t.classList.remove("on"),2200)}
+function durPicker(m){const st=stack.at(-1).st,u=st.mode==="until";if(u){const r=untilCalc(st);if(r)st.minutes=Math.max(1,Math.ceil(r.ms/MIN))}return `<div class="dur"><div class="seg" role="group" aria-label="Lock type"><button data-a="mode" data-v="dur" aria-pressed="${!u}">For a duration</button><button data-a="mode" data-v="until" aria-pressed="${u}">Until a time</button></div>${u?untilUI(st):""}<div class="chips"${u?" hidden":""}>${PRESETS.map(p=>`<button class="chip" data-a="preset" data-v="${p}" aria-pressed="${p===m}">${fmtDur(p*MIN)}</button>`).join("")}</div>
+ <div class="row stepper"${u?" hidden":""}><button class="rnd" data-a="dec" aria-label="Minus 5 minutes">${ic("minus")}</button><div class="dv"><span class="big" id="durv">${fmtDur(m*MIN)}</span><span class="small">Adjust in 5 min steps</span></div><button class="rnd" data-a="inc" aria-label="Plus 5 minutes">${ic("plus")}</button></div>${u?"":custUI(st)}</div>`}
+
+const DOMS=["instagram.com","facebook.com","youtube.com","tiktok.com","x.com","twitter.com","reddit.com","netflix.com","twitch.tv","snapchat.com","pinterest.com","discord.com","web.whatsapp.com","telegram.org","linkedin.com","tumblr.com","9gag.com","imgur.com","spotify.com","amazon.com","primevideo.com","hulu.com","disneyplus.com","quora.com","threads.net","bsky.app","store.steampowered.com","roblox.com","espn.com","buzzfeed.com"];
+const normDom=s=>String(s).trim().toLowerCase().replace(/^https?:\/\//,"").replace(/^www\./,"").split("/")[0];
+function domSug(q){q=normDom(q);const taken=new Set(Native.domains().map(d=>d.domain)),pool=DOMS.filter(d=>!taken.has(d));if(!q)return pool.slice(0,4);let r=pool.filter(d=>d.startsWith(q)).concat(pool.filter(d=>!d.startsWith(q)&&d.includes(q)));if(!r.length&&!q.includes("."))r=[q+".com"];return r.filter(d=>d!==q).slice(0,5)}
+function hl(d,q){q=normDom(q);return q&&d.startsWith(q)?`<b>${esc(q)}</b>${esc(d.slice(q.length))}`:esc(d)}
+function sugUI(st){return `<div id="sugw" style="display:contents">${sugIn(st)}</div>`}
+function sugIn(st){const s=domSug(st.input);return s.length?`<div class="sugs"><div class="small">${st.input.trim()?"Suggestions":"Popular sites"}</div>${s.map(d=>`<button class="sg" data-a="fill" data-v="${d}"><span class="tile">${ic("lang")}</span><span>${hl(d,st.input)}</span></button>`).join("")}</div>`:""}
+function fmtClock(d){return (d.getHours()%12||12)+":"+String(d.getMinutes()).padStart(2,"0")+" "+(d.getHours()>=12?"PM":"AM")}
+function untilCalc(st){const m=/^\s*(\d{1,2})(?::?(\d{2}))?\s*$/.exec(st.ut||"");if(!m)return null;let h=+m[1];const mi=+(m[2]||0);if(mi>59||h>23)return null;if(h<=12){if(h<1)return null;h=h%12+(st.ap==="PM"?12:0)}const n=new Date(now()),t=new Date(n);t.setHours(h,mi,0,0);if(t<=n)t.setDate(t.getDate()+1);return{ms:t-n,at:t}}
+function parseDur(s){s=String(s).toLowerCase().replace(/hours?|hrs?/g,"h").replace(/minutes?|mins?/g,"m").replace(/days?/g,"d").trim();const c=/^(\d+):(\d{1,2})$/.exec(s);if(c)return +c[1]*60+ +c[2];if(!/^(\s*\d+(\.\d+)?\s*[dhm]?)+\s*$/.test(s))return 0;let t=0;s.replace(/(\d+(?:\.\d+)?)\s*([dhm])?/g,(_,n,u)=>{t+=n*(u==="d"?1440:u==="h"?60:1)});return Math.round(t)}
+function lockMs(st){return st.mode==="until"?(untilCalc(st)||{ms:0}).ms:st.minutes*MIN}
+function lockSum(st){if(st.mode==="until"){const r=untilCalc(st);return r?`Locked until <b>${fmtClock(r.at)}</b>, ${fmtDur(r.ms)} from now`:"Type a valid unlock time"}return `Locked for <b>${fmtDur(st.minutes*MIN)}</b>`}
+function untilUI(st){const r=untilCalc(st);return `<div class="timebox"><div class="search">${ic("clock")}<input type="text" id="ut" inputmode="numeric" placeholder="6:30" aria-label="Unlock time" autocomplete="off" value="${esc(st.ut||"")}"></div><div class="seg">${["AM","PM"].map(x=>`<button data-a="ap" data-v="${x}" aria-pressed="${st.ap===x}">${x}</button>`).join("")}</div></div><div class="small">${r?`Unlocks at ${fmtClock(r.at)}${r.at.getDate()!==new Date(now()).getDate()?" tomorrow":""}, in ${fmtDur(r.ms)}`:"Type a time like 6:30 or 18:45"}</div>`}
+function custUI(st){return `<div class="cust"><div class="search">${ic("clock")}<input type="text" id="cust" placeholder="Type a time, e.g. 1h 30m" aria-label="Custom duration" autocomplete="off" value="${esc(st.cust||"")}"></div><button class="btn sm" data-a="setcust">Set</button></div>`}
+const screens={
+home(){const L=Native.lockedApps(),D=Native.domains().filter(d=>d.until>now()).length;
+ const nav=(i,t,s,to)=>`<button class="card navc" data-a="go" data-v="${to}"><span class="tile">${ic(i)}</span><div class="grow"><div class="t-md">${t}</div><div class="sub">${s}</div></div><span class="chev">${ic("chev")}</span></button>`;
+ return bar("BLOCK",0,`<span class="hdic${L.length?" on":""}">${ic("sec")}</span>`)+`<div class="body">${nav("block","Block apps","Pick an app and set a timer","apps")}${nav("lang","Block websites",`${D} domain(s) blocked`,"domains")}${nav("bars","Screen time","Daily average and most used app","stats")}${nav("sec","Permissions","Check access the blocker needs","perms")}${nav("lock","Locked screen","Image shown when a locked app opens","lockscr")}
+ <div class="t-lg" style="margin-top:8px">Active locks</div>${L.length?L.map(a=>`<div class="card"><span class="ico" style="background:${a.color}">${a.label[0]}</span><div class="grow"><div class="t-md">${esc(a.label)}</div><div class="sub">${a.pkg}</div></div><span class="timer" data-t="${a.until}">${fmtLeft(a.until)}</span></div>`).join(""):`<div class="empty">No apps are locked right now.</div>`}</div>`},
+apps(st){const locked=new Set(Native.lockedApps().map(a=>a.pkg)),q=st.query.toLowerCase();
+ return bar("Choose an app",1)+`<div class="body" style="padding:0"><div style="padding:4px 16px 8px"><div class="search">${ic("search")}<input type="text" id="q" placeholder="Search apps" aria-label="Search apps" value="${esc(st.query)}"></div></div>${Native.listApps().filter(a=>a.label.toLowerCase().includes(q)||a.pkg.includes(q)).map(a=>`<button class="li" data-a="pick" data-v="${a.pkg}" ${locked.has(a.pkg)?"disabled":""}><span class="ico" style="background:${a.color}">${a.label[0]}</span><span class="grow" style="flex:1"><div class="t-md">${a.label}</div><div class="sub">${a.pkg}</div></span>${locked.has(a.pkg)?`<span class="pill lock">${ic("lock")}Locked</span>`:""}</button>`).join("")}</div>`},
+timer(st,arg){const a=Native.appInfo(arg);
+ return bar("Set timer",1)+`<div class="body" style="gap:16px"><div class="tgt"><span class="ico lg" style="background:${a.color}">${a.label[0]}</span><div><div class="t-hd">Block ${a.label}</div><div class="sub">${a.pkg}</div></div></div><div class="note">${ic("lock")}<span>While the timer runs, this app cannot be opened and this blocker cannot be uninstalled.</span></div>${durPicker(st.minutes)}</div><div class="foot"><div class="sum" id="lockedfor">${lockSum(st)}</div><button class="btn full" data-a="start" ${lockMs(st)?"":"disabled"}>Start lock</button></div>`},
+domains(st){const D=Native.domains();
+ return bar("Block websites",1)+`<div class="body"><div class="search">${ic("lang")}<input type="text" id="dom" placeholder="Domain (e.g. example.com)" aria-label="Domain" value="${esc(st.input)}" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="url"></div>${durPicker(st.minutes)}
+ <div class="note">${ic("lang")}<span>Blocked sites are filtered in every browser through a local DNS filter (you approve it once) and also checked in the address bar of supported browsers.</span></div>
+ ${S.strictDns?`<div class="note warn">${ic("block")}<span>Private DNS is set to a fixed host, which bypasses the filter. Set it to Automatic or Off in Settings for full coverage.</span></div>`:""}
+ <div class="t-lg">Blocked domains</div>${D.length?D.map(d=>{const on=d.until>now();return `<div class="card"><span class="tile">${ic("lang")}</span><div class="grow"><div class="t-md">${esc(d.domain)}</div><div class="sub" ${on?`data-t="${d.until}"`:""}>${on?fmtLeft(d.until):"Expired"}</div></div>${on?"":`<button class="ib" data-a="rmdom" data-v="${esc(d.domain)}" aria-label="Remove">${ic("del")}</button>`}</div>`}).join(""):`<div class="empty">No domains blocked yet.</div>`}</div><div class="foot"><button class="btn full" id="addd" data-a="adddom" ${st.input.trim()&&lockMs(st)?"":"disabled"}>Block domain</button></div>`},
+stats(){const u=Native.usage();if(!u.hasPermission)return bar("Screen time",1)+`<div class="body"><div style="font-size:16px;line-height:24px">Usage access is needed to read your screen time.</div><div><button class="btn" data-a="grant" data-v="usage">Allow usage access</button></div></div>`;
+ const tot=u.daily.reduce((a,b)=>a+b[1],0),avg=(n=>n?tot/n:0)(u.daily.filter(d=>d[1]>0).length),today=u.daily[6][1],mx=Math.max(...u.daily.map(d=>d[1])),wavg=u.weeks.reduce((a,b)=>a+b,0)/u.weeks.length,wd=tot-wavg;
+ return bar("Screen time",1)+`<div class="body"><div class="card st-hero"><div class="small">Today</div><div class="st-big">${fmtDur(today)}</div><div class="st-ins">${insight(u,avg,today)}</div><div class="small">This week: ${fmtDur(tot)}, ${Math.abs(wd)<wavg/20?"close to":fmtDur(Math.abs(wd))+(wd>0?" above":" below")} your weekly average.</div></div>
+ <div class="stat"><div class="card"><div><div class="small">Daily average</div><div class="t-lg">${fmtDur(avg)}</div></div></div><div class="card"><div><div class="small">Busiest day</div><div class="t-lg">${fmtDur(mx)}</div></div></div><div class="card"><div><div class="small">This week</div><div class="t-lg">${fmtDur(tot)}</div></div></div><div class="card"><div><div class="small">Weekly average</div><div class="t-lg">${fmtDur(wavg)}</div></div></div></div>
+ <div class="card st-sec"><div class="t-lg">Last 7 days</div><div><div class="chart">${u.daily.map((d,i)=>`<div><b class="${i===6?"today":""}" style="height:0" data-h="${d[1]/mx*100}%" title="${fmtDur(d[1])}"></b></div>`).join("")}</div><div class="lbls">${u.daily.map(d=>`<span>${d[0]}</span>`).join("")}</div></div></div>
+ <div class="card st-sec"><div class="t-lg">Last 4 weeks</div>${u.weeks.map((w,i)=>`<div class="rowm"><div class="rl"><span>${i===3?"Last week":(4-i)+" weeks ago"}</span><span class="pri" style="font-weight:600">${fmtDur(w)}</span></div><i class="meter"><u style="width:${w/Math.max(...u.weeks)*100}%"></u></i></div>`).join("")}</div><div class="card st-sec"><div class="t-lg">Most used apps</div>${u.top.map(t=>`<div class="rowm"><div class="rl"><span>${t.label}</span><span class="pri" style="font-weight:600">${fmtDur(t.ms)}</span></div><i class="meter"><u style="width:${t.ms/u.top[0].ms*100}%"></u></i></div>`).join("")}</div></div>`},
+lockscr(){var A=Native.listApps()[0]||{label:"App",color:"#888"};
+ return bar("Locked screen",1)+`<div class="body"><div class="card"><div class="grow"><div class="t-md">Show locked screen</div><div class="sub">${S.lsOn?"Opening a locked app shows this screen.":"Opening a locked app goes to the home page."}</div></div><button class="sw${S.lsOn?" on":""}" data-a="lsOn" role="switch" aria-checked="${S.lsOn?"true":"false"}" aria-label="Show locked screen"><i></i></button></div>${lsCard(esc(A.label),`<span class="ico" style="background:${A.color}">${esc(A.label[0])}</span>`,"Unlocks in 1h 30m",0,1)}<input type="file" id="lsfile" accept="image/*" hidden><button class="btn full" data-a="lspick">${S.lsImg?"Change image":"Upload image"}</button>${S.lsImg?`<button class="tonal full" data-a="lsclear">Remove image</button>`:""}</div>`},
+perms(){const P=Native.perms(),lock=Native.anyLockActive();
+ return bar("Permissions",1)+`<div class="body">${P.map(p=>`<div class="card perm"><span class="tile${p.granted?" ok":""}">${ic(PI[p.id])}</span><div class="grow"><div class="t-md">${p.t}${p.req?"":` <span class="opt">Optional</span>`}</div><div class="sub">${p.d}</div></div>${p.granted?`<span class="pill ok">${ic("check")}Granted</span>`:`<button class="btn sm" data-a="grant" data-v="${p.id}">Allow</button>`}</div>`).join("")}
+ <div class="card" style="display:block"><div class="t-md">Stronger uninstall protection</div>${S.owner?`<div class="sub">This app is a device owner, so Android itself blocks uninstalling it while a lock is active.</div><button class="btn" style="margin-top:8px" data-a="release" ${lock?"disabled":""}>${lock?"Locked until the timer ends":"Release device owner"}</button>`:
+ `<div class="sub">Device administrator can be bypassed by turning off accessibility first. For a lock Android enforces itself, run this once from a computer with USB debugging on and no accounts on the phone:</div><div class="code">adb shell dpm set-device-owner com.example.appblocker/.admin.BlockerDeviceAdminReceiver</div><button class="tonal" style="margin-top:10px" data-a="owner">Demo: I ran the command</button>`}</div></div>`}
+};
+function paint(){const top=stack[stack.length-1],el=$$(".scr",stackEl).pop();if(!el)return mount();
+ const q=document.activeElement&&document.activeElement.id,pos=document.activeElement&&document.activeElement.selectionStart;
+ const sc=$(".body",el)?.scrollTop||0;el.innerHTML=screens[top.name](top.st,top.arg);const b=$(".body",el);if(b)b.scrollTop=sc;
+ if(q){const n=document.getElementById(q);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
+ $$("[data-h]",el).forEach(b=>requestAnimationFrame(()=>b.style.height=b.dataset.h));
+ if(top.name==="stats")dayDet(top.st);
+  if(top.name==="perms"&&firstRun)checkFirstRun()}
+function dayDet(st,tap){const sc=$$(".scr",stackEl).pop(),ch=sc&&$(".chart",sc);if(!ch)return;const w=ch.parentNode,lb=$(".lbls",w);$$(".dayd",w.parentNode).forEach(e=>e.remove());[...ch.children,...(lb?lb.children:[])].forEach(e=>e.classList.remove("sel"));
+ const i=st.day;if(i==null)return;const u=Native.usage(),d=u.daily[i],det=u.det&&u.det[i];
+ if(!d||!(d[1]>0)||!det||!det.length){st.day=null;if(tap)toast("No details for this day");return}
+ [ch.children[i],lb&&lb.children[i]].forEach(e=>e&&e.classList.add("sel"));
+ const mx=Math.max(...det.map(t=>t.ms));
+ w.insertAdjacentHTML("afterend",`<div class="dayd"><div class="rowb"><span class="t-md">${i===6?"Today":d[0]}</span><span class="pri" style="font-weight:600">${fmtDur(d[1])}</span></div>${det.map(t=>`<div class="rowm"><div class="rl"><span>${esc(t.label)}</span><span class="pri" style="font-weight:600">${fmtDur(t.ms)}</span></div><i class="meter"><u style="width:${t.ms/mx*100}%"></u></i></div>`).join("")}</div>`)}
+function checkFirstRun(){if(PERMS.filter(p=>p.req).every(p=>S.perms[p.id])){firstRun=false;stack=[{name:"home",st:{}}];mount(true);toast("All set. You can start locking apps.")}}
+setInterval(()=>{ // per-second tick, like the 1s LaunchedEffect loop
+ $$("[data-t]").forEach(e=>{const u=+e.dataset.t;if(u<=now()){if(stack.at(-1).name!=="perms")paint()}else e.textContent=fmtLeft(u)});
+ const o=$(".ovl");if(o){const u=+o.dataset.u;if(u<=now())o.remove();else $("[data-ov]",o).textContent="Unlocks in "+fmtLeft(u)}
+ const d=new Date();$("#clock").textContent=(d.getHours()%12||12)+":"+String(d.getMinutes()).padStart(2,"0")},1000);
+
+/* ============ dialogs / overlay ============ */
+function dialog(title,msg,okText,onOk,icon){const s=document.createElement("div");s.className="scrim";s.innerHTML=`<div class="dlg" role="dialog" aria-label="${esc(title)}"><span class="tile big">${ic(icon||"sec")}</span><div class="t-lg">${title}</div><div class="sub" style="font-size:14px">${msg}</div><div class="acts"><button class="btn full" data-x="ok">${okText}</button><button class="tonal full" data-x="no">Not now</button></div></div>`;
+ s.onclick=e=>{const x=e.target.dataset.x;if(x||e.target===s){s.remove();if(x==="ok")onOk()}};$("#phone").append(s)}
+function overlay(label,until,isDomain){$(".ovl")?.remove();if(!S.lsOn){stack=[{name:"home",st:{}}];mount(true);toast(label+" is locked");return}const o=document.createElement("div");o.className="ovl"+(S.lsImg?" ls":"");o.dataset.u=until;
+ if(S.lsImg){o.innerHTML=`${lsCard(esc(label),lsIco(label,isDomain),"Unlocks in "+fmtLeft(until),1)}<button class="btn full" data-x="home">Go to home screen</button>`;o.onclick=e=>{if(e.target.dataset.x)o.remove()};$("#phone").append(o);return}
+ o.innerHTML=`<div class="t-hd" style="letter-spacing:.2em;font-weight:800">BLOCK</div><div class="t-lg" style="margin-top:8px">${esc(label)}</div><div data-ov style="font-size:16px;line-height:24px;padding:16px 0">Unlocks in ${fmtLeft(until)}</div><div class="small" style="margin-bottom:20px">Stay focused. It opens again when the timer ends.</div><button class="btn" data-x="home">Go to home screen</button>`;
+ o.onclick=e=>{if(e.target.dataset.x)o.remove()};$("#phone").append(o)}
+
+/* ============ events ============ */
+document.addEventListener("click",e=>{
+ const c=e.target.closest(".chart>div,.lbls>span");if(c&&stack.at(-1).name==="stats"){const i=[...c.parentNode.children].indexOf(c),t=stack.at(-1).st;t.day=t.day===i?null:i;dayDet(t,1);return}
+  const b=e.target.closest("[data-a]");if(b){const a=b.dataset.a,v=b.dataset.v,top=stack.at(-1),st=top.st;
+  if(a==="back")back();
+  else if(a==="go")go(v);
+  else if(a==="pick")go("timer",v);
+  else if(a==="preset"){st.mode="dur";st.minutes=+v;paint()}
+    else if(a==="mode"){st.mode=v;if(v==="until"&&!st.ut){const t=new Date(now()+36e5);st.ut=((t.getHours()%12)||12)+":"+String(t.getMinutes()).padStart(2,"0");st.ap=t.getHours()>=12?"PM":"AM"}paint()}
+    else if(a==="ap"){st.ap=v;paint()}
+    else if(a==="setcust"){const n=parseDur(st.cust||"");if(!n){toast("Type a time like 1h 30m or 90");return}st.minutes=Math.min(7*1440,Math.max(5,n));st.cust="";paint()}
+    else if(a==="fill"){st.input=v;paint()}
+  else if(a==="dec"||a==="inc"){st.minutes=a==="dec"?Math.max(5,st.minutes-5):Math.min(7*1440,st.minutes+5);paint()}
+  else if(a==="start"){const ms=lockMs(st);if(!ms)return;Native.startBlock(top.arg,ms);const n=Native.appInfo(top.arg).label;stack=stack.slice(0,1);mount(true);toast(`${n} locked for ${fmtDur(ms)}`)}
+  else if(a==="adddom"){const add=()=>{Native.addDomain(st.input,lockMs(st));st.input="";paint();toast("Domain blocked")};
+   if(!S.perms.vpn)dialog("Turn on website blocking","App Blocker filters blocked sites on this device with a local DNS filter, so they stay blocked in every browser. Nothing leaves your device.","Turn on",()=>{Native.setPerm("vpn",1);add()},"lang");else add()}
+  else if(a==="rmdom"){Native.removeDomain(v);paint()}
+  else if(a==="grant"){const p=PERMS.find(x=>x.id===v);dialog(p.t,p.d,"Allow",()=>{Native.setPerm(v,1);paint()},PI[v])}
+  else if(a==="owner"){S.owner=1;save();paint()}
+    else if(a==="lsOn"){S.lsOn=S.lsOn?0:1;save();paint()}
+    else if(a==="lspick"){$("#lsfile")?.click()}
+    else if(a==="lsclear"){S.lsImg="";save();paint()}
+  else if(a==="release"){S.owner=0;save();paint();toast("Device owner released")}
+  return}
+ const d=e.target.closest("[data-d]");if(d)demo(d.dataset.d)});
+function domRefresh(st){const b=$("#addd");if(b)b.disabled=!(st.input.trim()&&lockMs(st))}
+document.addEventListener("input",e=>{const top=stack.at(-1);
+ if(e.target.id==="q"){top.st.query=e.target.value;paint()}
+ if(e.target.id==="dom"){top.st.input=e.target.value;domRefresh(top.st)}
+  if(e.target.id==="ut"){top.st.ut=e.target.value;paint()}
+  if(e.target.id==="cust")top.st.cust=e.target.value});
+ document.addEventListener("keydown",e=>{if(e.key!=="Enter")return;const st=stack.at(-1).st;
+  if(e.target.id==="cust")$("[data-a=setcust]")?.click();
+  else if(e.target.id==="dom")$("#addd")?.click()});
+function lsLoad(f){if(!f)return;var rd=new FileReader();rd.onerror=()=>toast("Could not read that image");rd.onload=()=>{var im=new Image();im.onerror=()=>toast("That file is not a usable image");im.onload=()=>{try{var r=$("#phone").getBoundingClientRect(),ar=r.width&&r.height?r.width/r.height:9/19,W=540,H=Math.round(W/ar),c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d"),sw=im.width,sh=sw/ar;if(sh>im.height){sh=im.height;sw=sh*ar}x.drawImage(im,(im.width-sw)/2,(im.height-sh)/2,sw,sh,0,0,W,H);S.lsImg=c.toDataURL("image/jpeg",.82);S.lsOn=1;try{save()}catch(_){toast("Image is too large to save")}paint()}catch(_){toast("Could not process image")}};im.src=rd.result};rd.readAsDataURL(f)}
+function lsCard(nm,ico,tm,ov,pv){var im=S.lsImg;return `<div class="lscard${pv?" pv":""}"><div class="lsimg${im?"":" none"}"${im?` style="background-image:url('${im}')"`:""}>${im?"":`<div class="lsnone">No image yet</div>`}</div><div class="lsrow">${ico}<div><div class="lsname">${nm}</div><div class="lstime"${ov?" data-ov":""}>${tm}</div></div></div></div>`}
+function lsIco(label,isDomain){var a=isDomain?null:Native.lockedApps().find(x=>x.label===label);return a?`<span class="ico" style="background:${a.color}">${esc(a.label[0])}</span>`:`<span class="tile">${ic(isDomain?"lang":"lock")}</span>`}
+var lsRaw=null,lsC={z:1,x:0,y:0,fw:0,fh:0,s:1};
+function lsOpen(f){if(!f)return;var rd=new FileReader();rd.onerror=()=>toast("Could not read that image");rd.onload=()=>{var im=new Image();im.onerror=()=>toast("That file is not a usable image");im.onload=()=>{lsRaw=im;lsCropUI()};im.src=rd.result};rd.readAsDataURL(f)}
+function lsCropDraw(){var im=lsRaw,b=Math.max(lsC.fw/im.width,lsC.fh/im.height),s=b*lsC.z,w=im.width*s,h=im.height*s,mx=(w-lsC.fw)/2,my=(h-lsC.fh)/2;lsC.x=Math.max(-mx,Math.min(mx,lsC.x));lsC.y=Math.max(-my,Math.min(my,lsC.y));lsC.s=s;var e=$("#cropi");e.style.width=w+"px";e.style.height=h+"px";e.style.left=(lsC.fw/2-w/2+lsC.x)+"px";e.style.top=(lsC.fh/2-h/2+lsC.y)+"px"}
+function lsCropUI(){$(".lscrop")?.remove();var o=document.createElement("div");o.className="lscrop";o.innerHTML=`<div class="t-lg">Adjust image</div><div class="small">Drag to move, slide to zoom</div><div class="cropf" id="cropf"><img id="cropi" alt="" draggable="false"></div><input type="range" id="cropz" min="1" max="4" step="0.01" value="1" aria-label="Zoom"><div class="cropb"><button class="tonal" data-c="cancel">Cancel</button><button class="btn" data-c="save">Save</button></div>`;$("#phone").append(o);$("#cropi",o).src=lsRaw.src;var f=$("#cropf",o),k=f.getBoundingClientRect().width/f.offsetWidth||1,d=null;lsC.z=1;lsC.x=0;lsC.y=0;lsC.fw=f.offsetWidth;lsC.fh=f.offsetHeight;lsCropDraw();
+ f.onpointerdown=e=>{d={x:e.clientX,y:e.clientY,ox:lsC.x,oy:lsC.y};try{f.setPointerCapture(e.pointerId)}catch(_){}};
+ f.onpointermove=e=>{if(!d)return;lsC.x=d.ox+(e.clientX-d.x)/k;lsC.y=d.oy+(e.clientY-d.y)/k;lsCropDraw()};
+ f.onpointerup=f.onpointercancel=()=>{d=null};
+ $("#cropz",o).oninput=e=>{lsC.z=+e.target.value;lsCropDraw()};
+ o.onclick=e=>{var c=e.target.dataset.c;if(c==="cancel"){lsRaw=null;o.remove()}else if(c==="save")lsCropSave(o)}}
+function lsCropSave(o){try{var im=lsRaw,s=lsC.s,W=480,H=Math.round(W*lsC.fh/lsC.fw),c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d"),sw=lsC.fw/s,sh=lsC.fh/s,sx=(im.width*s/2-lsC.fw/2-lsC.x)/s,sy=(im.height*s/2-lsC.fh/2-lsC.y)/s;x.drawImage(im,sx,sy,sw,sh,0,0,W,H);S.lsImg=c.toDataURL("image/jpeg",.85);S.lsOn=1;try{save()}catch(_){toast("Image is too large to save")}o.remove();lsRaw=null;paint()}catch(_){toast("Could not process image")}}
+document.addEventListener("change",e=>{if(e.target.id==="lsfile"){lsOpen(e.target.files&&e.target.files[0]);e.target.value=""}});
+$("#demoToggle").onclick=()=>$("#demo").classList.toggle("open");
+function demo(k){
+ if(k==="theme"){const dark=document.documentElement.dataset.theme==="light";S.dark=dark?"dark":"light";document.documentElement.dataset.theme=S.dark;save()}
+ else if(k==="ff"){S.off+=10;save();paint();toast("Fast-forwarded 10 minutes")}
+ else if(k==="dns"){S.strictDns=S.strictDns?0:1;save();paint()}
+ else if(k==="overlay-app"){const a=Native.lockedApps()[0];a?overlay(a.label,a.until,false):toast("Lock an app first, then try again")}
+ else if(k==="overlay-web"){const d=Native.domains().find(x=>x.until>now());d?overlay(d.domain,d.until,true):toast("Block a website first, then try again")}
+ else if(k==="first"){PERMS.forEach(p=>S.perms[p.id]=0);S.owner=0;save();firstRun=true;stack=[{name:"perms",st:{}}];mount(true)}
+ else if(k==="reset"){const th=S.dark;S=fresh();S.dark=th;save();firstRun=false;stack=[{name:"home",st:{}}];mount(true)}
+ $("#demo").classList.remove("open")}
+
+if(S.dark)document.documentElement.dataset.theme=S.dark;
+firstRun=!PERMS.filter(p=>p.req).every(p=>S.perms[p.id]);
+stack=[{name:firstRun?"perms":"home",st:{}}];mount(false);
+</script>
+</body>
+</html>
