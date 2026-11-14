@@ -1,7 +1,6 @@
 name: Custom Build
 
-# Repo: Chaotic369/Lockapp
-# Note: this project uses AGP 8.7.3 (gradle/libs.versions.toml), which requires Gradle 8.9 or newer.
+# Repo: Chaotic369/BLOCK
 
 on:
   workflow_dispatch:
@@ -9,7 +8,7 @@ on:
       app_name:
         description: "App display name"
         required: true
-        default: "ChaoticLauncher"
+        default: "Block"
         type: string
       app_version:
         description: "App version name (for example 1.0.0)"
@@ -41,7 +40,7 @@ jobs:
 
       - name: Patch app name and version
         env:
-          APP_NAME: ${{ github.event.inputs.app_name || 'ChaoticLauncher' }}
+          APP_NAME: ${{ github.event.inputs.app_name || 'Block' }}
           APP_VERSION: ${{ github.event.inputs.app_version || '1.0.0' }}
           RUN_NUMBER: ${{ github.run_number }}
         run: |
@@ -51,7 +50,7 @@ jobs:
           import sys
           from xml.sax.saxutils import escape, quoteattr
 
-          name = os.environ.get("APP_NAME", "").strip() or "ChaoticLauncher"
+          name = os.environ.get("APP_NAME", "").strip() or "Block"
           version = os.environ.get("APP_VERSION", "").strip() or "1.0.0"
           run_number = int(os.environ.get("RUN_NUMBER", "1") or "1")
 
@@ -160,18 +159,18 @@ jobs:
           print("Icon injected into mipmap-* densities")
           PY
 
+      # Optional: if the DEBUG_KEYSTORE_B64 secret is set, every build is signed with the
+      # same key so new APKs install over the old app. Skipped when the secret is missing.
       - name: Restore signing key
         env:
           KEYSTORE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
         run: |
           if [ -z "$KEYSTORE_B64" ]; then
-            echo "::error::Secret DEBUG_KEYSTORE_B64 is not set"
-            exit 1
+            echo "DEBUG_KEYSTORE_B64 not set, using a fresh debug key"
+            exit 0
           fi
           mkdir -p ~/.android
           echo "$KEYSTORE_B64" | base64 -d > ~/.android/debug.keystore
-          keytool -list -v -keystore ~/.android/debug.keystore \
-            -alias androiddebugkey -storepass android | grep -E "SHA1|SHA256"
 
       - name: Build debug APK
         run: gradle assembleDebug --no-daemon
@@ -179,6 +178,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.inputs.app_name || 'ChaoticLauncher' }}
+          name: ${{ github.event.inputs.app_name || 'Block' }}
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
